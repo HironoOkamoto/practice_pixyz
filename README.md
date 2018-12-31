@@ -9,16 +9,3 @@
 
 <br/>
 
-## directory structure
-
-```
-.
-├─── training
-    ├── data
-        ├── mnist
-        ├── svhn
-        └── usps
-    ├── traincodes
-    └── weights
-
-```
