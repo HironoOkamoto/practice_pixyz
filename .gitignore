@@ -1,0 +1,11 @@
+ICML_exp/*
+**/data/*
+*.jpg
+*.npy
+*.pkl
+*.ckpt
+*.pth
+*.log
+**/__pycache__
+!jpg/*
+**/.ipynb_checkpoints/
