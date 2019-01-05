@@ -2,6 +2,7 @@ ICML_exp/*
 **/data/*
 *.jpg
 *.npy
+*.png
 *.pkl
 *.ckpt
 *.pth

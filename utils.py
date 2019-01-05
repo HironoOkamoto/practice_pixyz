@@ -4,136 +4,83 @@ import umap
 import numpy as np
 from torch import nn
 from tqdm import tqdm
+from sklearn.metrics import confusion_matrix, classification_report, precision_score
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def latent_space_plot(data_loader, E, title):
-    E.eval()
-    zs = []
-    ys = []
-    for batch_idx, (x, y) in enumerate(data_loader):
-        z = E(x.to(device))
-        ys.extend(y)
-        zs.extend(z.cpu().detach().numpy())
-    zs = np.array(zs)
-    ys = np.array(ys)
-
-    embedding = umap.UMAP(random_state=42).fit_transform(zs)
-    #embedding = TSNE(random_state=42).fit_transform(zs)
-    plt.style.use("ggplot")
-    plt.figure(figsize=(6, 5))
-    plt.title(title)
-    plt.scatter(embedding[:,0],embedding[:,1], c=ys, cmap=plt.cm.rainbow, s=2)
-    plt.colorbar()
-    plt.show()
-
-    
-def encoder_plot(data_loader, E, D):
-    E.eval()
-    D.eval()
-    
-    images, labels = iter(data_loader).next()
-    
-    images = images.to(device)
-    z = E(images)
-    samples = D(z)
-    samples = samples.cpu().data.numpy().transpose(0, 2, 3, 1).squeeze()
-    
-    print("↓generate")
-    plt.figure(figsize=(10, 2))
+       
+def plot_sample(D, epoch, z_dim=63, y_dim=10, sample_num=100):
+    # fixed noise & condition サンプル画像を作る用
+    np.random.seed(42)
+    sample_z_ = torch.zeros((sample_num, z_dim))
     for i in range(10):
-        plt.subplot(2, 10, i+1)
+        sample_z_[i*y_dim] = torch.from_numpy(np.random.rand(1, z_dim))#torch.rand(1, z_dim) # 正規分布randn or 一様分布rand
+        for j in range(1, y_dim):
+            sample_z_[i*y_dim + j] = sample_z_[i*y_dim]
+
+    temp = torch.zeros((10, 1))
+    for i in range(y_dim):
+        temp[i, 0] = i
+
+    temp_y = torch.zeros((sample_num, 1))
+    for i in range(10):
+        temp_y[i*y_dim: (i+1)*y_dim] = temp
+
+    sample_y_ = torch.zeros((sample_num, y_dim))
+    sample_y_.scatter_(1, temp_y.type(torch.LongTensor), 1)
+    sample_z_, sample_y_ = sample_z_.to(device), sample_y_.to(device)
+
+    samples = D(sample_z_, sample_y_)
+    samples = samples["probs"].cpu().data.numpy().squeeze()
+    
+    # 横軸 z固定, y変化
+    # 縦軸 z変化, y固定
+    fig = plt.figure(figsize=(10, 10))
+    for i in range(100):
+        plt.subplot(10, 10, i+1)
         plt.xticks([])
         plt.yticks([])
-        plt.subplots_adjust(wspace=0., hspace=0.)
         plt.imshow(samples[i], cmap=plt.cm.gray)
-    images = images.cpu().data.numpy().transpose(0, 2, 3, 1).squeeze()
-    for i in range(10):
-        plt.subplot(2, 10, i+11)
-        plt.xticks([])
-        plt.yticks([])
-        plt.subplots_adjust(wspace=0., hspace=0.)
-        plt.imshow(images[i], cmap=plt.cm.gray)
+    #plt.savefig("./logs/generate.png")
+    fig.suptitle("epoch: {}".format(epoch+1), va="bottom", fontsize=30, y=0.9)
+    plt.savefig("./logs/mnist_gif/{}.png".format(epoch+1), bbox_inches="tight", pad_inches=0.0)
     plt.show()
-    print("↑true")
     
     
-# solver 
-def training_AE(train_loader, test_loader, E, D, E_optimizer, D_optimizer, criterion, epoch_num):
-    recon_loss_list = []
-    for k in range(epoch_num):
-        for batch_idx, (x, y) in tqdm(enumerate(train_loader)):
-            E.train()
-            D.train()
+def plot_loss(train_hist):
+#     plt.figure(figsize=(10, 10))
+#     plt.subplot(222)
+#     plt.title("Encoder loss")
+#     plt.plot(train_hist["E_loss"])
+#     plt.subplot(223)
+#     plt.title("Decoder loss")
+#     plt.plot(train_hist["D_loss"])
+#     plt.subplot(224)
+#     plt.title("precision: {:.4f}".format(train_hist["precision"][-1]))
+    #plt.ylim(0.95, 0.995)
+    plt.plot(train_hist["precision"])
+    plt.savefig("./logs/plot_loss.png", bbox_inches="tight", pad_inches=0.0)
+    plt.show()
 
+    
+# test
+def compute_precision(C, test_loader):
+    C.eval()
+    preds = []
+    ys = []
+    with torch.no_grad():
+        for batch_idx, (x, y) in enumerate(test_loader):
             x = x.to(device)
-
-            # 再構成
-            E_optimizer.zero_grad()
-            D_optimizer.zero_grad()
-
-            #1. sample from q(z|x) 
-            x_ = D(E(x))
-            recon_loss = criterion(x_, x)
-            recon_loss.backward()
-
-            E_optimizer.step()
-            D_optimizer.step()
-
-            recon_loss_list.append(recon_loss.detach())
-
-            #if (batch_idx + 1) % 400 == 0:
-    encoder_plot(test_loader, E, D)
-    plt.plot(recon_loss_list)
-    plt.show()
-      
+            pred = C(x)
+            preds.extend(pred["probs"].detach().cpu().numpy())
+            ys.extend(y)
+    preds = np.array(preds)
+    ys = np.array(ys)
+            
+    precision = precision_score(ys, preds.argmax(1), average="macro")
+    print(precision)
+    print(confusion_matrix(ys, preds.argmax(1)))
+    print(classification_report(ys, preds.argmax(1)))
+    return precision
+            
     
-def training_DAE(train_loader, test_loader, E, D, dfn, E_optimizer, D_optimizer, dfn_optimizer, criterion, epoch_num):
-    recon_loss_list = []
-    rate_loss_list = []
-    for k in range(epoch_num):
-        for batch_idx, (x, y) in tqdm(enumerate(train_loader)):
-            E.train()
-            D.train()
-
-            x = x.to(device)
-            y = torch.eye(10)[y].to(device)
-
-            # 再構成
-            E_optimizer.zero_grad()
-            D_optimizer.zero_grad()
-
-            x_ = D(E(x))
-            recon_loss = criterion(x_, x)
-            recon_loss.backward()
-
-            E_optimizer.step()
-            D_optimizer.step()
-
-            # 評価予測
-            E_optimizer.zero_grad()
-            dfn_optimizer.zero_grad()
-
-            z = E(x)
-            r = dfn(z)
-            rate_loss = criterion(r, y) 
-            rate_loss.backward()
-
-            E_optimizer.step()
-            dfn_optimizer.step()
-
-            recon_loss_list.append(recon_loss.detach())
-            rate_loss_list.append(rate_loss.detach())
-            
-            #if (batch_idx + 1) % 400 == 0:
-            
-    encoder_plot(test_loader, E, D)
-    plt.plot(recon_loss_list)
-    plt.show()
-    plt.plot(rate_loss_list)
-    plt.show()
-
-             
-
-                
-                
