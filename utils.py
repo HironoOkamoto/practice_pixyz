@@ -14,7 +14,7 @@ def plot_sample(D, epoch, z_dim=63, y_dim=10, sample_num=100):
     np.random.seed(42)
     sample_z_ = torch.zeros((sample_num, z_dim))
     for i in range(10):
-        sample_z_[i*y_dim] = torch.from_numpy(np.random.rand(1, z_dim))#torch.rand(1, z_dim) # 正規分布randn or 一様分布rand
+        sample_z_[i*y_dim] = torch.from_numpy(np.random.randn(1, z_dim))#torch.rand(1, z_dim) # 正規分布randn or 一様分布rand
         for j in range(1, y_dim):
             sample_z_[i*y_dim + j] = sample_z_[i*y_dim]
 
