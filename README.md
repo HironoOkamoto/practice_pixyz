@@ -11,5 +11,5 @@
 
 ## Results
 
-# M2
-<p align="left"><img width="30%" src="jpg/ssvae_mnist_150.gif" /></p>
+### M2
+<p align="left"><img width="50%" src="jpg/ssvae_mnist_150.gif" /></p>
