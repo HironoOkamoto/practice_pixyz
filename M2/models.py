@@ -147,10 +147,10 @@ class Decoder_m1(Bernoulli):
         return {"probs": self.conv_d(h)}
     
     
-# classifier p(y|x)
+# classifier q(y|x)
 class Classifier(RelaxedCategorical):    
     def __init__(self, y_dim=10):
-        super(Classifier, self).__init__(cond_var=["x"], var=["y"], temperature=0.5)
+        super(Classifier, self).__init__(cond_var=["x"], var=["y"], temperature=0.5, name="q")
         self.input_height = 28
         self.input_width = 28
 
@@ -183,10 +183,10 @@ class Classifier(RelaxedCategorical):
         out = self.fc(c2_flat)
         return {"probs": out}
     
-# latent classifier p(y|z)
+# latent classifier q(y|z)
 class LatentClassifier(RelaxedCategorical):    
     def __init__(self, z_dim=63, y_dim=10):
-        super(LatentClassifier, self).__init__(cond_var=["z"], var=["y"], temperature=0.5)
+        super(LatentClassifier, self).__init__(cond_var=["z"], var=["y"], temperature=0.5, name="q")
         self.fc =  nn.Sequential(
             nn.Linear(z_dim, 256),
             nn.Dropout(p=0.4),
