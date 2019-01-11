@@ -49,7 +49,7 @@ def plot_sample(D, epoch, z_dim=63, y_dim=10, sample_num=100):
 def plot_sample_m1(D, epoch, z_dim=63, y_dim=10, sample_num=100):
     # fixed noise & condition サンプル画像を作る用
     np.random.seed(42)
-    sample_z_ = torch.from_numpy(np.random.randn(sample_num, z_dim).astype("float32")).to(device)
+    sample_z_ = torch.from_numpy(0.5*np.random.randn(sample_num, z_dim).astype("float32")).to(device) # 画像がきれいになるように0.5をかけた
     samples = D(sample_z_)
     samples = samples["probs"].cpu().data.numpy().squeeze()
     

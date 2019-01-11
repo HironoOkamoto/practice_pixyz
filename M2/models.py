@@ -222,9 +222,9 @@ class LatentEncoder(Normal):
         )
 
     def forward(self, z, y):
-        z1 = self.fc1(z)
-        z2 = self.fc2(z)
-        z = torch.cat([z1, z2*y], dim=1)
+        z_1 = self.fc1(z)
+        z_2 = self.fc2(z)
+        z = torch.cat([z_1, z_2*y], dim=1)
         z = self.fc(z)
         mu = z[:, :self.z2_dim]
         scale = F.softplus(z[:, self.z2_dim:])
@@ -253,10 +253,10 @@ class LatentDecoder(Normal):
             nn.Linear(1024, z_dim*2),
         )
         
-    def forward(self, z, y):
-        z1 = self.fc1(z)
-        z2 = self.fc2(z)
-        z = torch.cat([z1, z2*y], dim=1)
+    def forward(self, z2, y):
+        z_1 = self.fc1(z2)
+        z_2 = self.fc2(z2)
+        z = torch.cat([z_1, z_2*y], dim=1)
         z = self.fc_d(z)
         mu = z[:, :self.z2_dim]
         scale = F.softplus(z[:, self.z2_dim:])
