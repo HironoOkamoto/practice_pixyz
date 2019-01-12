@@ -65,7 +65,7 @@ def plot_sample_m1(D, epoch, z_dim=63, y_dim=10, sample_num=100):
     plt.savefig("./logs/mnist_gif_m1/{}.png".format(epoch+1), bbox_inches="tight", pad_inches=0.0)
     plt.show()
     
-def plot_sample_m1m2(D2, D1, epoch, z_dim=63, y_dim=10, sample_num=100):
+def plot_sample_m1m2(D2, D1, epoch, z_dim=20, y_dim=10, sample_num=100):
     # fixed noise & condition サンプル画像を作る用
     np.random.seed(42)
     sample_z_ = torch.zeros((sample_num, z_dim))
@@ -86,8 +86,8 @@ def plot_sample_m1m2(D2, D1, epoch, z_dim=63, y_dim=10, sample_num=100):
     sample_y_.scatter_(1, temp_y.type(torch.LongTensor), 1)
     sample_z_, sample_y_ = sample_z_.to(device), sample_y_.to(device)
 
-    z = D2.sample_mean(sample_z_, sample_y_)
-    samples = D1(z)
+    z = D2(sample_z_, sample_y_)
+    samples = D1(z["loc"])
     samples = samples["probs"].cpu().data.numpy().squeeze()
     
     # 横軸 z固定, y変化

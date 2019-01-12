@@ -166,7 +166,7 @@ class Classifier(RelaxedCategorical):
             nn.ReLU(),
             nn.MaxPool2d(2))
 
-        self.fc =  nn.Sequential(
+        self.fc = nn.Sequential(
             nn.Linear((self.input_height // 4) * (self.input_width // 4) * 128, 256),
             nn.Dropout(p=0.4),
             nn.ReLU(),
@@ -258,8 +258,8 @@ class LatentDecoder(Normal):
         z_2 = self.fc2(z2)
         z = torch.cat([z_1, z_2*y], dim=1)
         z = self.fc_d(z)
-        mu = z[:, :self.z2_dim]
-        scale = F.softplus(z[:, self.z2_dim:])
+        mu = z[:, :self.z_dim]
+        scale = F.softplus(z[:, self.z_dim:])
         return {"loc": mu, "scale": scale}
     
 def initialize_weights(model):
