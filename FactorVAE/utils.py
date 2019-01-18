@@ -113,15 +113,15 @@ def make_gif(n, data_loader, E, D, name, m=30, scale=3, z_dim=10):
         os.makedirs(gif_path)
 
     for j in range(m):
-        plt.figure(figsize=(z_dim, 1))
+        plt.figure(figsize=(z_dim, 1.2))
         for i in range(z_dim):
             plt.subplot(1, z_dim, i+1)
             plt.xticks([])
             plt.yticks([])
-            plt.subplots_adjust(wspace=0., hspace=0.)
-            plt.title("z{}".format(int(i+1)), fontsize=15)
+            #plt.subplots_adjust(wspace=0., hspace=0.)
+            plt.title("z{}".format(int(i+1)), fontsize=13)
             if i==0:
                 plt.ylabel("{:+.1f}".format(scales[j]), fontsize=15)
-            plt.imshow(samples_[i+10*j], cmap=plt.cm.gray)
-        plt.savefig(join(gif_path, "{}.png".format(j)))
+            plt.imshow(samples_[i+z_dim*j], cmap=plt.cm.gray)
+        plt.savefig(join(gif_path, "{:0>2}.png".format(j)))
         plt.show()
