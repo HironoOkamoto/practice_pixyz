@@ -13,11 +13,15 @@
 ### M2
 <p align="left"><img width="50%" src="jpg/ssvae_mnist_150.gif" /></p>
 
+解説記事: https://qiita.com/kogepan102/items/22b685ce7e9a51fbab98
+
 ### NP
 <p align="left"><img width="50%" src="jpg/NP.gif" /></p>
 
 ### ANP
 <p align="left"><img width="50%" src="jpg/ANP.gif" /></p>
+
+解説記事: https://qiita.com/kogepan102/items/d03bc2f0819cbf550e8d
 
 
 ### betaVAE
