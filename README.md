@@ -28,3 +28,7 @@
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_0.gif" /></p>
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_1.gif" /></p>
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_2.gif" /></p>
+
+
+### GAN
+<p align="left"><img width="50%" src="jpg/mnist_gif_GAN.gif" /></p>
