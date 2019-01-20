@@ -29,6 +29,9 @@
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_1.gif" /></p>
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_2.gif" /></p>
 
+解説記事: https://qiita.com/kogepan102/items/163133b955006d197607
 
 ### GAN
 <p align="left"><img width="50%" src="jpg/mnist_gif_GAN.gif" /></p>
+
+解説記事: https://qiita.com/kogepan102/items/ceb0c3c6b5abb7958a76
