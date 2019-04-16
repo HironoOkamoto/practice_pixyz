@@ -4,13 +4,17 @@ import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def encoder_plot(data_loader, E, D, conditional=True):
-#     E.eval()
-#     D.eval()
 
+def label2onehot(y):
+    y[:, 3] = y[:, 3] == 36
+    y[:, 5] = y[:, 5] - 1
+    y = y[:, [3, 5]]
+    return y
+
+def encoder_plot(data_loader, E, D, conditional=True):
     images, labels = iter(data_loader).next()
     images = images.to(device)
-    labels = labels.to(device)
+    labels = label2onehot(labels).to(device)
     
     if conditional:
         z = E.sample_mean({"x": images, "y": labels})
@@ -27,6 +31,7 @@ def encoder_plot(data_loader, E, D, conditional=True):
         plt.xticks([])
         plt.yticks([])
         plt.subplots_adjust(wspace=0., hspace=0.)
+        plt.title(labels[i].detach().cpu().numpy())
         plt.imshow(samples[i], plt.cm.gray)
     images = images.cpu().data.numpy().transpose(0, 2, 3, 1).squeeze()
     for i in range(10):
@@ -37,25 +42,4 @@ def encoder_plot(data_loader, E, D, conditional=True):
         plt.imshow(images[i], plt.cm.gray)
     plt.show()
     print("↑true")
-    
-def label2onehot(label):
-    I_3 = np.eye(3)
-    I_4 = np.eye(4)
-    I_10 = np.eye(10)
-    return np.hstack((label[:, 0][:, None], I_3[label[:, 1]], I_4[label[:, 2]], I_10[label[:, 3]]))
 
-def onehot2label(onehot):
-    return np.hstack(((onehot[:, 0]>0.5)[:, None], onehot[:, 1:4].argmax(1)[:, None],
-                      onehot[:, 4:8].argmax(1)[:, None], onehot[:, 8:].argmax(1)[:, None]))
-
-
-def elbo(x, q, p):
-    #1. sample from q(z|x) 
-    samples = q.sample(x)
-    
-    #2. caluculate the lower bound (log p(x,z) - log q(z|x))
-    lower_bound = p.log_likelihood(samples) - q.log_likelihood(samples)
-
-    loss = -torch.mean(lower_bound)
-
-    return loss
