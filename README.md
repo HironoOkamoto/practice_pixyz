@@ -23,6 +23,8 @@
 
 解説記事: https://qiita.com/kogepan102/items/d03bc2f0819cbf550e8d
 
+### JMVAE
+解説記事: https://qiita.com/kogepan102/items/ab5c2d69ead9703cf617
 
 ### betaVAE
 <p align="left"><img width="80%" src="jpg/betavae_C_dsprites_z_dim10_gamma80_gif_0.gif" /></p>
